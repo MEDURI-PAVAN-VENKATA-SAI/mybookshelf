@@ -122,7 +122,7 @@ export default function Favourites() {
       </div>
     
       <div className={`${ openPopUp ? "pointer-events-auto" : "hidden"} fixed z-50 max-h-[calc(100%-56px)] align-middle mx-4 py-8 
-                      bg-[var(--background)] justify-center shadow-md rounded-xl items-center overflow-auto scrollbar-auto`}>
+                      bg-[var(--background)] justify-center shadow-md rounded-xl items-center overflow-auto scrollbar-auto border border-[var(--border)]`}>
           <div className={`align-middle w-full h-full justify-center items-center overflow-x-hidden overflow-y-auto scrollbar-auto`}>
               <ReportCard />
           </div>

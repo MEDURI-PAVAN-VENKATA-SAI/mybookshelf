@@ -9,11 +9,15 @@ import {
     addToFavourites, removeFromFavourites, deleteReport, removeFromUploads, 
     startReading, updateReadingStatus, rereadBook, removeFromReadings
 } from "@/api/books";
+import { useLanguages } from "../contexts/LanguageContext";
+import { useCategories } from "../contexts/CategoriesContext";
 
 export function useActions() {
 
     const navigate = useNavigate();
 
+    const { allLanguages } = useLanguages();
+    const { categories } = useCategories();
     const { addFavourite, removeFavourite } = useFavourites();
     const { removeUpload } = useUploads();
     const { addReading, updateReading, removeReading } = useReadings();
@@ -27,6 +31,22 @@ export function useActions() {
     const goToBookReader = (book) => {navigate(`/reader/${book.bookId}`, { state: { book: book }});};
 
     const download = (book) => {downloadWithToast(book);};
+
+    const getLanguageLabel = (code) => {
+        if (!code) return "";
+        const lang = allLanguages.find(l => l.code === code);
+        return lang ? lang.label : code;
+    };
+
+    const getCategoryLabels = (codes=[]) => {
+        if (!Array.isArray(codes) || codes.length === 0) return [];
+        const [catCode, subCode] = codes;
+        const category = categories.find(c => c.id === catCode);
+        if (!category) return codes;
+        if (!subCode) return [category.label];
+        const subcategory = category.subcategories?.find(s => s.id === subCode);
+        return subcategory ? [category.label, subcategory.label] : [category.label];
+    };
 
     //------------------------------------------- favourites ---------------------------------------------
 
@@ -112,7 +132,7 @@ export function useActions() {
     };
 
     return { 
-        goToBookDetails, goToBookReader, toggleFavourite, download,
+        goToBookDetails, goToBookReader, toggleFavourite, download, getLanguageLabel, getCategoryLabels,
         addTheReading, updateTheReading, removeTheReading, rereadTheBook, 
         reportTheBook, removeTheReport, removeTheUpload
     };

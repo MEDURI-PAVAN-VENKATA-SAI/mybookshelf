@@ -9,6 +9,7 @@ import { loginWithGoogle, loginWithEmail } from "../../firebasesetup/authService
 import { useLoader } from '../contexts/LoaderContext';
 import Loading from '../utils/Loading';
 
+
 const useAutoClear = (value, setter, delay = 10000) => {
   useEffect(() => {
     if (!value) return;
@@ -17,8 +18,9 @@ const useAutoClear = (value, setter, delay = 10000) => {
   }, [value]);
 };
 
+
 function Login() {
-  const { setUser } = useUser();
+  const { user, setUser } = useUser();
   const { loading, setLoading } = useLoader();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,12 +28,15 @@ function Login() {
   const [show, setShow] = useState(false);
   const navigate = useNavigate();
 
-  useAutoClear(message, setMessage);
+  // Redirect if already logged in
+  useEffect(() => { if (user?.userId) { navigate("/app/home"); }}, [user]);
 
+  useAutoClear(message, setMessage);
+  
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    if (!email.trim() || !password.trim()) { setMessage("Invalid Email or password"); setLoading(false); return; }   // Check if any Empty fields
+    if (!email.trim() || !password.trim()) { setMessage("Invalid Email or password"); setLoading(false); return; }  // Check if any Empty fields
     if (password.trim().length < 6) { setMessage("Invalid Password"); setLoading(false); return; }   // Check Password length
     try { await loginWithEmail(email.trim(), password.trim(), setUser, setMessage, navigate, toast); }
     finally { setLoading(false); }
@@ -42,7 +47,6 @@ function Login() {
     try { await loginWithGoogle(setUser, navigate, toast); }
     finally { setLoading(false); }
   };
-
 
   return (
     <div className={`w-full h-full flex items-center overflow-hidden justify-center px-2 py-8 bg-[var(--background)]`}>
@@ -56,7 +60,7 @@ function Login() {
           <h1 className="text-3xl font-bold text-[var(--text)] mb-2">
             Welcome Back
           </h1>
-          <p className="text-[var(--muted-text)]">
+          <p className="text-sm text-[var(--muted-text)]">
             Sign in to continue to your library
           </p>
         </div>
@@ -145,7 +149,7 @@ function Login() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-[var(--card)] text-[var(--muted-text)]">
-                  Or continue with
+                  or continue with
                 </span>
               </div>
             </div>

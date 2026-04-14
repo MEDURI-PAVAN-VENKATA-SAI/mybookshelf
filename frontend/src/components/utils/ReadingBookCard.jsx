@@ -16,10 +16,12 @@ export default function ReadingBookCard({ book, onClick, scrollRef }) {
   const authors = safeBook.authors.length ? safeBook.authors.join(", ") : "Unknown author";
   const progress = safeBook.readingStatus.totalPages > 0 ? Math.round((safeBook.readingStatus.currentPage / safeBook.readingStatus.totalPages) * 100) : 0;
 
-  const [isFavourite, setIsFavourite] = useState(safeBook.isFavourite || false);
+  const [isFavourite, setIsFavourite] = useState(false);
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => { setIsFavourite(safeBook.isFavourite || false); }, [safeBook.isFavourite]);
+  
   // Menu hide on click + scroll
   useEffect(() => {
     if (!show) return;

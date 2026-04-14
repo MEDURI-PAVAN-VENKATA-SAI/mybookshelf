@@ -49,7 +49,7 @@ export function normalizeLanguages(languages) {
     label: value.label,
     bookCount: value.bookCount
   }))
-  .sort((a, b) => a.label.localeCompare(b.label));;
+  .sort((a, b) => a.label.localeCompare(b.label));
 
   const availLangs = allLangs.filter( lang => lang.bookCount > 0 );
 

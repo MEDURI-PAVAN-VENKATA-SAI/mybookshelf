@@ -21,15 +21,19 @@ function MenuItem({ icon, label, onClick, danger, className = "" }) {
 
 export default function BookCard({ book, onClick, secondaryCategory=false, showActions = false, scrollRef, className="" }) 
 {
-  const { toggleFavourite, goToBookDetails, reportTheBook, download } = useActions();
+  const { toggleFavourite, goToBookDetails, reportTheBook, download, getCategoryLabels } = useActions();
   const safeBook = useMemo(() => ({ ...defaultBook(), ...(book || {}) }), [book] );
 
   const authors = safeBook.authors.length ? safeBook.authors.join(", ") : "Unknown author";
   
-  const [isFavourite, setIsFavourite] = useState(safeBook.isFavourite || false);
+  const [isFavourite, setIsFavourite] = useState(false);
   const [show, setShow] = useState(false);
 
   const menuRef = useRef(null);
+
+  useEffect(() => { setIsFavourite(safeBook.isFavourite || false); }, [safeBook.isFavourite]);
+
+  const categories = useMemo(() => { return getCategoryLabels(safeBook.categories);}, [safeBook.categories, getCategoryLabels]);
 
   // Menu hide on click + scroll
   useEffect(() => {
@@ -83,7 +87,7 @@ export default function BookCard({ book, onClick, secondaryCategory=false, showA
             <div>{safeBook.ratingAvg.toFixed(1)}</div> 
           </span>
           <span className="w-fit max-w-[calc(100%-36px)] text-xs px-2 py-1 rounded-full bg-[var(--secondary)] text-[var(--text)] line-clamp-1">
-            { (secondaryCategory ? safeBook.categories[1] : safeBook.categories[0]) || safeBook.categories[0] }
+            { (secondaryCategory ? categories[1] : categories[0]) || categories[0] }
           </span>
         </div>
       </div>

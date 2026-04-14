@@ -20,9 +20,11 @@ export default function UploadBookCard({ book, onClick, scrollRef }) {
     const enableAction = (safeBook.uploadStatus.status === "published") ? true : false ;
 
     const [show, setShow] = useState(false);
-    const [isFavourite, setIsFavourite] = useState(safeBook.isFavourite || false);
+    const [isFavourite, setIsFavourite] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    useEffect(() => { setIsFavourite(safeBook.isFavourite || false); }, [safeBook.isFavourite]);
+    
     // Menu hide on click + scroll
     useEffect(() => {
         if (!show) return;

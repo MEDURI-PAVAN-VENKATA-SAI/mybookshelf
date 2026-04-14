@@ -16,7 +16,8 @@ const allBooks = [
         authors: ['Matt Haig', 'APJ Abdul Kalam'],
         coverUrl: 'https://images.pexels.com/photos/1029141/pexels-photo-1029141.jpeg?auto=compress&cs=tinysrgb&w=400',
         ratingAvg: 4.5,
-        categories: ['Fiction', 'Fairy tales'],
+        categories: ['FIC', 'FAIRY'],
+        language: "en",
         isFavourite: true
     },
     {
@@ -25,7 +26,8 @@ const allBooks = [
         authors: ['James Clear'],
         coverUrl: 'https://images.pexels.com/photos/1266808/pexels-photo-1266808.jpeg?auto=compress&cs=tinysrgb&w=400',
         ratingAvg: 4.8,
-        categories: ['Non-Fiction'],
+        categories: ['REL'],
+        language: "en",
         isFavourite: true
     },
     {
@@ -230,7 +232,7 @@ function Home(){
         </div>
 
         <div className={`${ openPopUp ? "pointer-events-auto" : "hidden"} fixed z-50 max-h-[calc(100%-56px)] align-middle mx-4 py-8 
-                bg-[var(--background)] justify-center shadow-md rounded-xl items-center overflow-auto scrollbar-auto`}>
+             bg-[var(--background)] justify-center shadow-md rounded-xl items-center overflow-auto scrollbar-auto border border-[var(--border)]`}>
             <div className={`align-middle w-full h-full justify-center items-center overflow-x-hidden overflow-y-auto scrollbar-auto`}>
                 <ReportCard />
             </div>

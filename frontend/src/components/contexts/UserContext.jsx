@@ -1,50 +1,59 @@
-import React, { createContext, useContext, useEffect, useState, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useState, useMemo, useRef } from "react";
 import axios from "axios";
+import { DEFAULT_USER } from "@/constants/defaultUser";
 
 const API_URL = import.meta.env.VITE_BACKEND_URL;
-
-const DEFAULT_USER = {
-  userId: null,
-  email: null,
-  username: null,
-  displayName: null,
-  picture: null,
-  role: null,
-  hasPassword: false
-};
 
 const UserContext = createContext(null);
 
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(DEFAULT_USER);
+  const [user, setUserState] = useState(DEFAULT_USER);
   const [authLoading, setAuthLoading] = useState(true);
 
+  const calledRef = useRef(false);        // prevent double API in StrictMode
+
+  const setUser = (data) => {
+    setUserState(data);
+    if (data?.userId) {
+      localStorage.setItem("user", JSON.stringify(data));
+    } else {
+      localStorage.removeItem("user");
+    }
+  };
+
   useEffect(() => {
+    if (calledRef.current) return;
+    calledRef.current = true;
+
     let timeoutId;
 
     const restoreSession = async () => {
-      const token = localStorage.getItem("access_token");
 
-      timeoutId = setTimeout(() => {
-        console.warn("Auth restore timeout");
-        setUser(DEFAULT_USER);
+      const token = localStorage.getItem("access_token");
+      const cachedUser = localStorage.getItem("user");        // Load cached user first (instant UI)
+
+      if (cachedUser) {
+        setUserState(JSON.parse(cachedUser));
         setAuthLoading(false);
-      }, 10000);
+      }
 
       if (!token) {
-        clearTimeout(timeoutId);
         setUser(DEFAULT_USER);
         setAuthLoading(false);
         return;
       }
 
+      timeoutId = setTimeout(() => { setAuthLoading(false);}, 10000);      // when Auth timeout — uses cached user
+
       try {
         const res = await axios.get(`${API_URL}/auth/session`, { headers: { Authorization: `Bearer ${token}` }});
-        setUser(res.data.user);
+        setUser(res.data.user); // update + cache
       } 
-      catch {
-        localStorage.removeItem("access_token");
-        setUser(DEFAULT_USER);
+      catch (err) {                                   // network issue → DO NOT logout (only if invalid token → logout)
+        if (err.response?.status === 401) {
+          localStorage.removeItem("access_token");
+          setUser(DEFAULT_USER);
+        } 
       } 
       finally {
         clearTimeout(timeoutId);
@@ -56,13 +65,12 @@ export const UserProvider = ({ children }) => {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  // Memoized value
   const value = useMemo(() => {
     return { user, setUser, authLoading };
-  }, [ user, authLoading ]);
+  }, [user, authLoading]);
 
   return (
-    <UserContext.Provider value={ value }>
+    <UserContext.Provider value={value}>
       {children}
     </UserContext.Provider>
   );

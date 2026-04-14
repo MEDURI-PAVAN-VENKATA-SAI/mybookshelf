@@ -120,7 +120,7 @@ async def get_session(authorization: str = Header(...)):
     if not uid:
         raise HTTPException(status_code=401, detail="Invalid token payload")
 
-    user_doc = db.collection("users").document(uid).get(timeout=10)
+    user_doc = db.collection("users").document(uid).get()
     if not user_doc.exists:
         raise HTTPException(status_code=404, detail="User not found")
 

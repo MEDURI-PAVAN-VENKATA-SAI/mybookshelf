@@ -9,14 +9,31 @@ export const LanguageProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const cached = localStorage.getItem("languages");
+
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      setAllLanguages(parsed.allLanguages || []);
+      setAvailableLanguages(parsed.availableLanguages || []);
+      setLoading(false);
+    }
+
     const loadLanguages = async () => {
       try {
         const { allLangs, availLangs } = await fetchLanguages();
+
         setAllLanguages(allLangs);
         setAvailableLanguages(availLangs);
-      } catch (error) {
-        
-      } finally {
+
+        localStorage.setItem(
+          "languages",
+          JSON.stringify({
+            allLanguages: allLangs,
+            availableLanguages: availLangs,
+          })
+        );
+      } catch {}
+      finally {
         setLoading(false);
       }
     };

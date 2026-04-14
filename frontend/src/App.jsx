@@ -27,19 +27,24 @@ import Loading from './components/utils/Loading';
 
 function App() {
 
+  const { darkMode } = useTheme();
+  const { user, authLoading } = useUser();
+
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const {darkMode} = useTheme();
-  const {user, authLoading} = useUser();
+  const [showOnlineMsg, setShowOnlineMsg] = useState(false);
 
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
-      toast.success('You are back online!',{ hideProgressBar: true, position: "top-center"});
+
+      // Show "Back Online" for 2 sec
+      setShowOnlineMsg(true);
+      setTimeout(() => setShowOnlineMsg(false), 3000);
     };
 
     const handleOffline = () => {
       setIsOnline(false);
-      toast.error('No Internet Connection. Please check your network!', { hideProgressBar: true, position: "top-center"});
+      setShowOnlineMsg(false); // remove online msg if any
     };
 
     window.addEventListener('online', handleOnline);
@@ -51,55 +56,75 @@ function App() {
     };
   }, []);
 
-  if( authLoading ){
-    return <Loading />;
-  }
+  if (authLoading) return <Loading />;
+
+  const isLoggedIn = !!user.userId;
 
   return (
-    <>
-      <div className="flex flex-col min-h-screen bg-[var(--secondary)]">
-        <ToastContainer position="top-center" autoClose={3000} hideProgressBar={true} newestOnTop closeOnClick rtl={false}
+    <div className="flex flex-col min-h-screen bg-[var(--secondary)]">
+
+      <ToastContainer position="top-center" autoClose={3000} hideProgressBar={true} newestOnTop closeOnClick rtl={false}
             pauseOnFocusLoss draggable pauseOnHover theme={darkMode ? 'dark' : 'light'} 
-        />
+      />
 
-        <TopLoader />
+      <TopLoader />
 
-        <div className="flex flex-1">
-          <main className="flex-1 text-[var(--text)]">
-            <Routes>
-
-              <Route path="/" element={ user.userId ? <Navigate to={"/app/home"} replace/> : <Landing />} />
-              <Route path="/login" element={<Login />} />
-
-              <Route element={<ProtectedRoute />}>
-                <Route path="/app" element={<Main />} >
-                  <Route index element={<Navigate to="home" replace />} />
-                  <Route path="home" element={<Home />} />
-                  <Route path="profile" element={<Profile />} />
-                  <Route path="book/:id" element={<BookDetails />} />
-                  <Route path="favourites" element={<Favourites/>} />
-                  <Route path="readings" element={<Readings/>} />
-                  <Route path="uploads" element={<Uploads/>} />
-                  <Route path="report" element={<Report/>} />
-                  <Route path="info" element={<AboutUs/>} />
-                  <Route path="account" element={<Account/>} />
-                  <Route path="*" element={<NotFound />} />
-                </Route>
-                <Route path="/reader/:id" element={<Reader />} />
-              </Route>
-
-              <Route element={<AdminRoute />}>
-                <Route path="/admin" element={<Admin />} />
-              </Route>
-
-              <Route path="/unauthorized" element={<NotFound message='Unauthorized Access'/>} />
-              <Route path="*" element={<NotFound />} />
-
-            </Routes>
-          </main>
+      {!isOnline && (
+        <div className="fixed bottom-0 z-100 w-full h-5 text-center text-sm bg-red-600 text-white">
+          You are offline
         </div>
-      </div>
-    </>
+      )}
+
+      {/* Offline Message */}
+      {!isOnline && (
+        <div className={`fixed bottom-0 z-100 w-full h-5 text-center text-sm bg-red-600 text-white
+              transition-all duration-500 ease-in-out ${!isOnline ? "translate-y-0 bg-red-600 opacity-100" : "translate-y-full opacity-0"}`}>
+          You are offline
+        </div>
+      )}
+
+      {/* Back Online Message */}
+      {isOnline && showOnlineMsg && (
+        <div className={`fixed bottom-0 z-100 w-full h-5 text-center text-sm an bg-green-600 text-white transition-all duration-500
+              ease-in-out ${isOnline && showOnlineMsg ? "translate-y-0 bg-green-600 opacity-100" : "translate-y-full opacity-0"}`}>
+          Back online
+        </div>
+      )}
+
+      <main className="flex-1 text-[var(--text)]">
+        <Routes>
+
+          <Route path="/" element={ isLoggedIn ? <Navigate to="/app/home" replace /> : <Landing /> } />
+          <Route path="/login" element={<Login />} />
+
+          <Route element={<ProtectedRoute />}>
+            <Route path="/app" element={<Main />} >
+              <Route index element={<Navigate to="home" replace />} />
+              <Route path="home" element={<Home />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="book/:id" element={<BookDetails />} />
+              <Route path="favourites" element={<Favourites />} />
+              <Route path="readings" element={<Readings />} />
+              <Route path="uploads" element={<Uploads />} />
+              <Route path="report" element={<Report />} />
+              <Route path="info" element={<AboutUs />} />
+              <Route path="account" element={<Account />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+
+            <Route path="/reader/:id" element={<Reader />} />
+          </Route>
+
+          <Route element={<AdminRoute />}>
+            <Route path="/admin" element={<Admin />} />
+          </Route>
+
+          <Route path="/unauthorized" element={<NotFound message='Unauthorized Access' />} />
+          <Route path="*" element={<NotFound />} />
+
+        </Routes>
+      </main>
+    </div>
   );
 }
 

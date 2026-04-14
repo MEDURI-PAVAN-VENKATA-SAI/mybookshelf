@@ -8,8 +8,19 @@ export function CategoriesProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const cached = localStorage.getItem("categories");
+
+    if (cached) {
+      setCategories(JSON.parse(cached));
+      setLoading(false);
+    }
+
     fetchCategories()
-      .then(setCategories)
+      .then((data) => {
+        setCategories(data);
+        localStorage.setItem("categories", JSON.stringify(data));
+      })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 

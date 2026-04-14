@@ -4,6 +4,7 @@ from firebase_admin import firestore
 from google.cloud.firestore_v1 import FieldFilter
 from app.dependencies.auth import admin_required, get_current_user
 from app.firebase_config import db
+from app.routes.config import refresh_languages_cache, refresh_categories_cache
 from app.drive_service import build_book_folder_path, build_cover_folder_path, drive_file_base_name, get_drive_filename, get_extension, move_and_rename_drive_file, drive_file_name, delete_drive_file
 
 
@@ -18,9 +19,10 @@ def incrementBookCount(category: str, subcategory: str = None, language: str = N
     if subcategory:             # only update subcategory if exists
         updates[f"categories.{category}.subcategories.{subcategory}.bookCount"] = firestore.Increment(incValue)
     cat_ref.update(updates)
+    refresh_categories_cache()
     if language:
         lang_ref.update({ f"languages.{language}.bookCount": firestore.Increment(incValue), "updatedAt": firestore.SERVER_TIMESTAMP })
-
+        refresh_languages_cache()
 
 
 # approve book uploaded by user
@@ -111,7 +113,7 @@ def approve_book(book_id: str, data: dict, admin=Depends(admin_required)):
 def batch_approve( data: dict, admin=Depends(admin_required) ):
     items = data.get("items", [])       # items = [{ bookId, category?, subcategory? }]
     for item in items:
-        approve_book( book_id=item["bookId"], category=item.get("category"), subcategory=item.get("subcategory"), admin=admin )
+        approve_book( book_id=item["bookId"], data={}, admin=admin )
     return {"message": "approved all books"}
 
 
