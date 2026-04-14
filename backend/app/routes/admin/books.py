@@ -134,7 +134,7 @@ def reject_book( book_id: str, reason: str, delete_files: bool = False, admin=De
 
     book_ref.update({"isVisible": False})
     db.collection("users").document(book["uploaderId"]).collection("uploads").document(book_id).update({"status": "rejected", "reason": reason})
-    return {"message": f"{book.get("title", "")} rejected"}
+    return {"message": f"{book.get('title', '')} rejected"}
 
 
 
