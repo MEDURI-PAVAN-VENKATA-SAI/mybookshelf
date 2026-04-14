@@ -204,7 +204,7 @@ def delete_book(book_id: str, reason: str = "", user=Depends(get_current_user)):
         incrementBookCount( category=category, subcategory=subcategory, language=language, incValue = -1 )
 
     book_ref.delete()
-    return {"message": f"{book.get("title","")} deleted"}
+    return {"message": f"{book.get('title', '')} deleted"}
 
 
 
