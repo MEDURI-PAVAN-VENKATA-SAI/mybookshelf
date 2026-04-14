@@ -12,10 +12,17 @@ from app.routes.config import get_drive_folders
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-SERVICE_ACCOUNT_PATH = os.path.join( BASE_DIR, os.getenv("FIREBASE_CREDENTIALS_PATH") )
+SERVICE_ACCOUNT_PATH = os.getenv("FIREBASE_CREDENTIALS_PATH")
 DRIVE_SCOPES = os.getenv("DRIVE_SCOPES", "").split(",")
 
-credentials = service_account.Credentials.from_service_account_file( SERVICE_ACCOUNT_PATH, scopes = DRIVE_SCOPES )
+if not SERVICE_ACCOUNT_PATH:
+    raise ValueError("FIREBASE_CREDENTIALS_PATH not set")
+
+# Fix for Production (Render) vs Local
+if not os.path.isabs(SERVICE_ACCOUNT_PATH):
+    SERVICE_ACCOUNT_PATH = os.path.join(BASE_DIR, SERVICE_ACCOUNT_PATH)
+
+credentials = service_account.Credentials.from_service_account_file( SERVICE_ACCOUNT_PATH, scopes=DRIVE_SCOPES )
 drive_service = build("drive", "v3", credentials=credentials)
 
 
